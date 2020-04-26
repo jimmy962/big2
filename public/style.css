@@ -14,3 +14,36 @@ main {
   width: 100%;
   overflow-y: scroll;
 }
+
+.game-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-canvas {
+  flex-grow: 3;
+  border: solid 1px black;
+  width: 100%;
+  display: block;
+}
+
+.game-hand {
+  flex-grow: 1;
+  border: solid 1px green;
+  width: 100%;
+  display: block;
+}
+
+.clicked-card {
+  border: solid 1.5px green !important;
+}
+
+.playing-card-wrapper {
+  transition: 0.2s;
+  margin-top: 0px;
+}
+
+.playingCards .card:hover {
+  border: solid 1.5px red;
+}
