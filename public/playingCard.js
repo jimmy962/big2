@@ -28,9 +28,6 @@ Vue.component('playingCard', {
   computed: {
     rank: function() {
       return {
-        // 'rank-k': this.card.rank === 'K',
-        // 'rank-q': this.card.rank === 'Q',
-        // 'rank-j': this.card.rank === 'J',
         'rank-10': this.card.rank === '10',
         'rank-9': this.card.rank === '9',
         'rank-8': this.card.rank === '8',

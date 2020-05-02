@@ -2,22 +2,27 @@ Vue.component('game', {
   data: function() {
     return {
       hand: [],
-      sorting: false
+      sorting: false,
+      gameWS: null,
+      handsPlayed: []
     }
   },
   template: `
   <div class="game-wrapper">
-    <div class="game-canvas"></div>
+    <div class="game-canvas">
+      <game-canvas v-bind:handsPlayed="handsPlayed"></game-canvas>
+    </div>
     <div class="game-hand">
       <button @click="shuffleHand()">change card</button>
       <button @click="sort()">Sort</button>
       <button @click="submit()">Submit</button>
       <div class="my-hand-wrapper" style="display: flex; justify-content: row">
-        <playing-card v-for="card of hand" v-bind:card="card" class="elevated-status"><playing-card>    
+        <playing-card v-for="card of hand" v-bind:card="card"><playing-card>    
       </div>
     </div>
   </div
   `,
+  props: ['user'],
   created: function() {
     this.shuffleHand();
     setTimeout(function(){ 
@@ -25,11 +30,37 @@ Vue.component('game', {
         revert: true,
       });
     }, 2000);
+    this.gameWs = new WebSocket('ws://' + window.location.host + '/ws-2');
+    var self = this;
+    this.gameWs.addEventListener('message', function(e) {
+      try {
+        const receivedMessage = JSON.parse(e.data);
+        if (receivedMessage.type === 'card(s)') {
+          const cards = receivedMessage.message.split(',').map(card => ({
+            suit: card.split('-')[0],
+            rank: card.split('-')[1]
+          }))
+          self.handsPlayed.push(cards);
+        }
+      } catch(e) {
+        console.log(e);
+        console.log("Error parsing message")
+      }
+    });
   },
   methods: {
     submit: function() {
       const clickedCards = _.filter(this.hand, 'clicked');
-      console.log(_.map(clickedCards, card => `${card.rank} - ${card.suit}`));
+      const selectedCards = _.map(clickedCards, card => card.suit+ '-' + card.rank).join(',');
+      this.gameWs.send(
+        JSON.stringify({
+          Message: selectedCards,
+          Type: 'card(s)',
+          PlayerX: 'playerA',
+          Username: this.user.username,
+          GameMaster: false
+        }
+      ));
     },
     sort: function() {
       const suitScore = { 'spades': 4, 'hearts': 3, 'clubs': 2, 'diams': 1 };
