@@ -9,7 +9,7 @@ new Vue({
       }
   },
   methods: {
-    updateUser: function(username, email) {
+    updateUser: function(email, username) {
       this.user.email = email;
       this.user.username = username;
       this.joined = true;

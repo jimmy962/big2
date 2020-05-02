@@ -7,21 +7,19 @@ Vue.component('game-canvas', {
   },
   props: ['handsPlayed'],
   template: `
-  <div>
-    <div>Last hand played!!!</div>
-    <ul v-for="card in lastHandPlayed">
-      {{card.suit + '-' + card.rank}}
-    </ul>
-    <div>Second to last hand played!!!</div>
-    <ul v-for="card in secondToLastHandPlayed">
-      {{card.suit + '-' + card.rank}}
-    </ul>
+  <div v-if="lastHandPlayed">
+    <h2>{{lastHandPlayed.username}} played:</h2>
+    <div class="my-hand-wrapper" style="display: flex; justify-content: row">
+      <playing-card v-for="card of lastHandPlayed.cards" v-bind:card="card"><playing-card>    
+    </div>
   </div>
   `,
   watch: {
-    handsPlayed: function(newHand) {
-      this.lastHandPlayed = newHand[newHand.length - 1];
-      this.secondToLastHandPlayed = newHand[newHand.length - 2];
+    handsPlayed: function(pipe) {
+      this.lastHandPlayed = {
+        cards: pipe[pipe.length - 1].cards,
+        username: pipe[pipe.length - 1].username
+      }
     }
   },
   created: function() {

@@ -40,7 +40,18 @@ Vue.component('game', {
             suit: card.split('-')[0],
             rank: card.split('-')[1]
           }))
-          self.handsPlayed.push(cards);
+          const handObject = {
+            cards, 
+            username: receivedMessage.username
+          };
+          if (receivedMessage.username === self.user.username) {
+            handObject.username = 'I';
+            cards.forEach((card) => {
+              const i = self.hand.findIndex(o => o.rank === card.rank && o.suit === card.suit);
+              self.hand.splice(i, 1);
+            });
+          }
+          self.handsPlayed.push(handObject);
         }
       } catch(e) {
         console.log(e);
@@ -82,13 +93,15 @@ Vue.component('game', {
     shuffleHand: function() {
       const ranks = ['K','Q','J','10','9','8','7','6','5','4','3','2','A'];
       const suits = ['hearts','spades','diams','clubs'];
+      const deck = [];
+      ranks.forEach(rank => {
+        suits.forEach(suit => {
+          deck.push({ rank, suit, clicked: false});
+        })
+      });
       this.hand.splice(0, this.hand.length);
       for (var i = 0; i < 13; i++) {
-        this.hand.push({
-          rank: ranks[Math.floor(Math.random() * ranks.length)],
-          suit: suits[Math.floor(Math.random() * suits.length)],
-          clicked: false
-        })
+        this.hand.push(deck[Math.floor(Math.random() * deck.length)]);
       }
     }
   }
