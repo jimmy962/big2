@@ -4,7 +4,8 @@ Vue.component('game', {
       hand: [],
       sorting: false,
       gameWS: null,
-      handsPlayed: []
+      handsPlayed: [],
+      isGameMaster: false
     }
   },
   template: `
@@ -13,7 +14,8 @@ Vue.component('game', {
       <game-canvas v-bind:handsPlayed="handsPlayed"></game-canvas>
     </div>
     <div class="game-hand">
-      <button @click="shuffleHand()">change card</button>
+      <button v-if="isGameMaster" @click="newGame()">New Game</button>
+      <button @click="shuffleHand()">Change card</button>
       <button @click="sort()">Sort</button>
       <button @click="submit()">Submit</button>
       <div class="my-hand-wrapper" style="display: flex; justify-content: row">
@@ -31,6 +33,14 @@ Vue.component('game', {
       });
     }, 2000);
     this.gameWs = new WebSocket('ws://' + window.location.host + '/ws-2');
+    this.gameWs.onopen = () => {
+      this.gameWs.send(
+        JSON.stringify({
+          Type: 'new_player',
+          Username: this.user.username,
+        }
+      ));
+    };
     var self = this;
     this.gameWs.addEventListener('message', function(e) {
       try {
@@ -52,6 +62,13 @@ Vue.component('game', {
             });
           }
           self.handsPlayed.push(handObject);
+        } else if (receivedMessage.type === 'new_player') {
+          console.log('New player joined!!!');
+          if (receivedMessage.username === self.user.username) {
+            self.isGameMaster = receivedMessage.gameMaster;
+          } else {
+            Materialize.toast(`${receivedMessage.username} joined the game.`, 2000);
+          }
         }
       } catch(e) {
         console.log(e);
@@ -103,6 +120,9 @@ Vue.component('game', {
       for (var i = 0; i < 13; i++) {
         this.hand.push(deck[Math.floor(Math.random() * deck.length)]);
       }
+    },
+    newGame: function() {
+      console.log('Starting new game!');
     }
   }
 })

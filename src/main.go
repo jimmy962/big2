@@ -57,18 +57,18 @@ func main() {
 		} else {
 			if !players.playerA {
 				players.playerA = true
-				newPlayer := player{name: "player A"}
+				newPlayer := player{name: "playerA"}
 				handleConnectionsGame(w, r, &newPlayer, &players)
 			} else if !players.playerB {
 				players.playerB = true
-				newPlayer := player{name: "player B"}
+				newPlayer := player{name: "playerB"}
 				handleConnectionsGame(w, r, &newPlayer, &players)
 			} else if !players.playerC {
 				players.playerC = true
-				newPlayer := player{name: "player C"}
+				newPlayer := player{name: "playerC"}
 				handleConnectionsGame(w, r, &newPlayer, &players)
 			} else {
-				newPlayer := player{name: "player D"}
+				newPlayer := player{name: "playerD"}
 				handleConnectionsGame(w, r, &newPlayer, &players)
 			}
 		}
@@ -124,6 +124,10 @@ func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *pl
 			*/
 			break
 		} else {
+			if msg.Type == "new_player" {
+				msg.PlayerX = (*newPlayer).name
+				msg.GameMaster = msg.PlayerX == "playerA"
+			}
 			gameBroadcast <- msg
 			/*
 				**Part A
