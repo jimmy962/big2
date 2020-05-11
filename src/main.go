@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -38,6 +39,22 @@ type gamePlayers struct {
 
 type player struct {
 	name string
+}
+
+func dealHands() ([]string, []string, []string, []string) {
+	ranks := [13]string{"K", "Q", "J", "10", "9", "8", "7", "6", "5", "4", "3", "2", "A"}
+	suits := [4]string{"hearts", "spades", "diams", "clubs"}
+	var deck []string
+	for _, rank := range ranks {
+		for _, suit := range suits {
+			deck = append(deck, suit+"-"+rank)
+		}
+	}
+	for i := 0; i < 52; i++ {
+		j := rand.Intn(52)
+		deck[i], deck[j] = deck[j], deck[i]
+	}
+	return deck[0:13], deck[13:26], deck[26:39], deck[39:52]
 }
 
 func main() {
@@ -127,6 +144,14 @@ func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *pl
 			if msg.Type == "new_player" {
 				msg.PlayerX = (*newPlayer).name
 				msg.GameMaster = msg.PlayerX == "playerA"
+			} else if msg.Type == "new_game" {
+				if (*allPlayers).playerA && (*allPlayers).playerB && (*allPlayers).playerC && (*allPlayers).playerD {
+					playerAHand, playerBHand, playerCHand, playerDHand := dealHands()
+					log.Printf(playerAHand[1])
+					log.Printf(playerBHand[1])
+					log.Printf(playerCHand[1])
+					log.Printf(playerDHand[1])
+				}
 			}
 			gameBroadcast <- msg
 			/*
