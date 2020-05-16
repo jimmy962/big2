@@ -1,7 +1,6 @@
 Vue.component('playingCard', {
   data: function() {
     return {
-      // clicked: false,
       suitMapping: {
         spades: '&spades;',
         hearts: '&hearts;',
@@ -51,8 +50,8 @@ Vue.component('playingCard', {
   },
   methods: {
     // clickCard: function() {
-    //   ['K', 'Q', 'J'].indexOf(card.rank) > -1 
-    //   this.clicked['clicked-margin'] = !this.clicked['clicked-margin']
+    //   this.card.clicked = !this.card.clicked;
+    //   console.log(this.card.clicked);
     // }
   }
 })

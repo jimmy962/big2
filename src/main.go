@@ -4,6 +4,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -85,6 +86,7 @@ func main() {
 				newPlayer := player{name: "playerC"}
 				handleConnectionsGame(w, r, &newPlayer, &players)
 			} else {
+				players.playerD = true
 				newPlayer := player{name: "playerD"}
 				handleConnectionsGame(w, r, &newPlayer, &players)
 			}
@@ -147,10 +149,12 @@ func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *pl
 			} else if msg.Type == "new_game" {
 				if (*allPlayers).playerA && (*allPlayers).playerB && (*allPlayers).playerC && (*allPlayers).playerD {
 					playerAHand, playerBHand, playerCHand, playerDHand := dealHands()
-					log.Printf(playerAHand[1])
-					log.Printf(playerBHand[1])
-					log.Printf(playerCHand[1])
-					log.Printf(playerDHand[1])
+					gameBroadcast <- gameMessage{PlayerX: "playerA", Message: strings.Join(playerAHand, ","), Type: "new_game"}
+					gameBroadcast <- gameMessage{PlayerX: "playerB", Message: strings.Join(playerBHand, ","), Type: "new_game"}
+					gameBroadcast <- gameMessage{PlayerX: "playerC", Message: strings.Join(playerCHand, ","), Type: "new_game"}
+					gameBroadcast <- gameMessage{PlayerX: "playerD", Message: strings.Join(playerDHand, ","), Type: "new_game"}
+					log.Printf(strings.Join(playerAHand, ","))
+					continue
 				}
 			}
 			gameBroadcast <- msg

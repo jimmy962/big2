@@ -5,7 +5,8 @@ Vue.component('game', {
       sorting: false,
       gameWS: null,
       handsPlayed: [],
-      isGameMaster: false
+      isGameMaster: false,
+      playerX: null
     }
   },
   template: `
@@ -66,8 +67,17 @@ Vue.component('game', {
           console.log('New player joined!!!');
           if (receivedMessage.username === self.user.username) {
             self.isGameMaster = receivedMessage.gameMaster;
+            self.playerX = receivedMessage.playerX;
           } else {
             Materialize.toast(`${receivedMessage.username} joined the game.`, 2000);
+          }
+        } else if (receivedMessage.type === 'new_game') {
+          if (receivedMessage.playerX === self.playerX) {
+            self.hand = receivedMessage.message.split(',').map(card => ({
+              suit: card.split('-')[0],
+              rank: card.split('-')[1],
+              clicked: false
+            }));
           }
         }
       } catch(e) {
@@ -84,7 +94,7 @@ Vue.component('game', {
         JSON.stringify({
           Message: selectedCards,
           Type: 'card(s)',
-          PlayerX: 'playerA',
+          PlayerX: this.playerX,
           Username: this.user.username,
           GameMaster: false
         }
@@ -122,7 +132,14 @@ Vue.component('game', {
       }
     },
     newGame: function() {
-      console.log('Starting new game!');
+      this.gameWs.send(
+        JSON.stringify({
+          Type: 'new_game',
+          PlayerX: this.playerX,
+          Username: this.user.username,
+          GameMaster: this.isGameMaster
+        }
+      ));
     }
   }
 })
