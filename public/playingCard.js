@@ -1,12 +1,6 @@
 Vue.component('playingCard', {
   data: function() {
     return {
-      suitMapping: {
-        spades: '&spades;',
-        hearts: '&hearts;',
-        diams: '&diams;',
-        clubs: '&clubs;'
-      }
     }
   },
   props: ['card'],

@@ -6,12 +6,14 @@ Vue.component('game', {
       gameWS: null,
       handsPlayed: [],
       isGameMaster: false,
-      playerX: null
+      playerX: null,
+      playerStatuses: { playerA: { username: '', cardsLeft: -1}, playerB: {}, playerC: {}, playerD: {} }
     }
   },
   template: `
   <div class="game-wrapper">
     <div class="game-canvas">
+      <player-statuses v-bind:players="playerStatuses" v-bind:user="user"></player-statuses>
       <game-canvas v-bind:handsPlayed="handsPlayed"></game-canvas>
     </div>
     <div class="game-hand">
@@ -20,7 +22,7 @@ Vue.component('game', {
       <button @click="sort()">Sort</button>
       <button @click="submit()">Submit</button>
       <div class="my-hand-wrapper" style="display: flex; justify-content: row">
-        <playing-card v-for="card of hand" v-bind:card="card"><playing-card>    
+        <playing-card v-for="card of hand" v-bind:card="card"></playing-card>    
       </div>
     </div>
   </div
@@ -64,13 +66,18 @@ Vue.component('game', {
           }
           self.handsPlayed.push(handObject);
         } else if (receivedMessage.type === 'new_player') {
-          console.log('New player joined!!!');
           if (receivedMessage.username === self.user.username) {
             self.isGameMaster = receivedMessage.gameMaster;
             self.playerX = receivedMessage.playerX;
           } else {
             Materialize.toast(`${receivedMessage.username} joined the game.`, 2000);
           }
+          _.forEach(self.playerStatuses, (o) => o.username = undefined)
+          receivedMessage.message.split(',').forEach((o) => {
+            const key = o.split(':')[0];
+            const username = o.split(':')[1];
+            self.playerStatuses[`player${key}`].username = username;
+          });
         } else if (receivedMessage.type === 'new_game') {
           if (receivedMessage.playerX === self.playerX) {
             self.hand = receivedMessage.message.split(',').map(card => ({
@@ -78,6 +85,8 @@ Vue.component('game', {
               rank: card.split('-')[1],
               clicked: false
             }));
+            _.forEach(self.playerStatuses, (o) => o.cardsLeft = 13);
+            console.log('bleh');
           }
         }
       } catch(e) {
@@ -112,10 +121,10 @@ Vue.component('game', {
       })
     },
     changeCard: function() {
-      const ranks = ['K','Q','J','10','9','8','7','6','5','4','3','2','A'];
-      const suits = ['hearts','spades','diams','clubs'];
-      this.testCard.rank =  ranks[Math.floor(Math.random() * ranks.length)];
-      this.testCard.suit =  suits[Math.floor(Math.random() * suits.length)];
+      // const ranks = ['K','Q','J','10','9','8','7','6','5','4','3','2','A'];
+      // const suits = ['hearts','spades','diams','clubs'];
+      // this.testCard.rank =  ranks[Math.floor(Math.random() * ranks.length)];
+      // this.testCard.suit =  suits[Math.floor(Math.random() * suits.length)];
     },
     shuffleHand: function() {
       const ranks = ['K','Q','J','10','9','8','7','6','5','4','3','2','A'];

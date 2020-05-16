@@ -38,8 +38,16 @@ type gamePlayers struct {
 	playerD bool
 }
 
+type gamePlayersName struct {
+	playerA string
+	playerB string
+	playerC string
+	playerD string
+}
+
 type player struct {
-	name string
+	name     string
+	username string
 }
 
 func dealHands() ([]string, []string, []string, []string) {
@@ -93,7 +101,7 @@ func main() {
 		}
 	})
 
-	go handleGameMessages()
+	go handleGameMessages(&players)
 
 	http.HandleFunc("/ws", handleConnections)
 
@@ -113,13 +121,6 @@ func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *pl
 	}
 	defer ws.Close()
 	gameClients[ws] = true
-	/* Part B
-	   1) announce player X has joined the game
-	   2) if it's player A...game master
-	   3) Front end should update the players at the table...if there's 4...start the game...
-	   ******************************************************************************
-	   4) Write a special message to the correct client that they are player X
-	*/
 	for {
 		var msg gameMessage
 		// Read in a new message as JSON and map it to a Message object
@@ -144,6 +145,7 @@ func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *pl
 			break
 		} else {
 			if msg.Type == "new_player" {
+				(*newPlayer).username = msg.Username
 				msg.PlayerX = (*newPlayer).name
 				msg.GameMaster = msg.PlayerX == "playerA"
 			} else if msg.Type == "new_game" {
@@ -153,32 +155,49 @@ func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *pl
 					gameBroadcast <- gameMessage{PlayerX: "playerB", Message: strings.Join(playerBHand, ","), Type: "new_game"}
 					gameBroadcast <- gameMessage{PlayerX: "playerC", Message: strings.Join(playerCHand, ","), Type: "new_game"}
 					gameBroadcast <- gameMessage{PlayerX: "playerD", Message: strings.Join(playerDHand, ","), Type: "new_game"}
-					log.Printf(strings.Join(playerAHand, ","))
-					continue
 				}
+				continue
 			}
 			gameBroadcast <- msg
-			/*
-				**Part A
-				1) pass message to the rest of the servers
-				2) Front end creates a special message for game starting
-				3) We check for that message...start shuffle and create deck...send
-				******************************************************************************
-				**Part A2
-				1) Front end creates a special message for game starting
-				2) We check for that message...start shuffle and create deck...send specific hand to each client
-				3) Make this reusable so that they can create a new game.
-				******************************************************************************
-			*/
 		}
 	}
 }
 
-func handleGameMessages() {
+func combineUsernames(playerNames *gamePlayersName, statuses *gamePlayers) string {
+	var usernames = ""
+	if (*playerNames).playerA != "" && (*statuses).playerA {
+		usernames = usernames + "A:" + (*playerNames).playerA
+	}
+	if (*playerNames).playerB != "" && (*statuses).playerB {
+		usernames = usernames + "," + "B:" + (*playerNames).playerB
+	}
+	if (*playerNames).playerC != "" && (*statuses).playerC {
+		usernames = usernames + "," + "C:" + (*playerNames).playerC
+	}
+	if (*playerNames).playerD != "" && (*statuses).playerD {
+		usernames = usernames + "," + "D:" + (*playerNames).playerD
+	}
+	return usernames
+}
+
+func handleGameMessages(statuses *gamePlayers) {
+	playerNames := gamePlayersName{}
 	for {
 		// Grab the next message from the broadcast channel
 		msg := <-gameBroadcast
-		// Send it out to every client that is currently connected
+		if msg.Type == "new_player" {
+			switch msg.PlayerX {
+			case "playerA":
+				playerNames.playerA = msg.Username
+			case "playerB":
+				playerNames.playerB = msg.Username
+			case "playerC":
+				playerNames.playerC = msg.Username
+			case "playerD":
+				playerNames.playerD = msg.Username
+			}
+			msg.Message = combineUsernames(&playerNames, statuses)
+		}
 		for gameClient := range gameClients {
 			err := gameClient.WriteJSON(msg)
 			if err != nil {

@@ -47,3 +47,10 @@ main {
 .playingCards .card:hover {
   border: solid 1.5px red;
 }
+
+.emphasize-username {
+  color: yellowgreen;
+  font-weight: bold;
+  text-decoration: underline; 
+  /* text-decoration: underline; */
+}
