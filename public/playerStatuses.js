@@ -15,6 +15,7 @@ Vue.component('player-statuses', {
       </div>
       <div v-if="!player.username" style="color: green">Seat available</div>
       <div v-if="player.cardsLeft > -1">&nbsp;-&nbsp;<b style="color: blue">{{player.cardsLeft}}</b></div>
+      <span v-if="player.myTurn">&nbsp;<== </span>
     </div>
   </div>`,
   created: function() {

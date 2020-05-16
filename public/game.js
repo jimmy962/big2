@@ -1,3 +1,9 @@
+const nextPlayer = {
+  playerA: 'playerB',
+  playerB: 'playerC',
+  playerC: 'playerD',
+  playerD: 'playerA'
+}
 Vue.component('game', {
   data: function() {
     return {
@@ -7,7 +13,7 @@ Vue.component('game', {
       handsPlayed: [],
       isGameMaster: false,
       playerX: null,
-      playerStatuses: { playerA: { username: '', cardsLeft: -1}, playerB: {}, playerC: {}, playerD: {} }
+      playerStatuses: { playerA: { username: '', cardsLeft: -1, myTurn: false }, playerB: {}, playerC: {}, playerD: {} }
     }
   },
   template: `
@@ -57,6 +63,9 @@ Vue.component('game', {
             cards, 
             username: receivedMessage.username
           };
+          self.playerStatuses[receivedMessage.playerX].cardsLeft -= handObject.cards.length
+          _.forEach(self.playerStatuses, o => o.myTurn = false)
+          self.playerStatuses[nextPlayer[receivedMessage.playerX]].myTurn = true;
           if (receivedMessage.username === self.user.username) {
             handObject.username = 'I';
             cards.forEach((card) => {
@@ -85,8 +94,10 @@ Vue.component('game', {
               rank: card.split('-')[1],
               clicked: false
             }));
-            _.forEach(self.playerStatuses, (o) => o.cardsLeft = 13);
-            console.log('bleh');
+            _.forEach(self.playerStatuses, (o) => {
+              o.cardsLeft = 13;
+              o.myTurn = false;
+            });
           }
         }
       } catch(e) {
