@@ -13,7 +13,7 @@ Vue.component('game', {
       handsPlayed: [],
       isGameMaster: false,
       playerX: null,
-      playerStatuses: { playerA: { username: '', cardsLeft: -1, myTurn: false }, playerB: {}, playerC: {}, playerD: {} }
+      playerStatuses: { playerA: { username: '', cardsLeft: -1, myTurn: false }, playerB: { myTurn: false }, playerC: { myTurn: false }, playerD: { myTurn: false } }
     }
   },
   template: `
@@ -24,9 +24,9 @@ Vue.component('game', {
     </div>
     <div class="game-hand">
       <button v-if="isGameMaster" @click="newGame()">New Game</button>
-      <button @click="shuffleHand()">Change card</button>
       <button @click="sort()">Sort</button>
-      <button @click="submit()">Submit</button>
+      <button v-if="canSubmit()" @click="submit()">Submit</button>
+      <button v-if="canSubmit()" @click="pass()">Pass</button>
       <div class="my-hand-wrapper" style="display: flex; justify-content: row">
         <playing-card v-for="card of hand" v-bind:card="card"></playing-card>    
       </div>
@@ -99,6 +99,10 @@ Vue.component('game', {
               o.myTurn = false;
             });
           }
+        } else if (receivedMessage.type === 'pass') {
+          _.forEach(self.playerStatuses, o => o.myTurn = undefined)
+          self.playerStatuses[nextPlayer[receivedMessage.playerX]].myTurn = true;
+          Materialize.toast(`${receivedMessage.username} passed.`, 1500);
         }
       } catch(e) {
         console.log(e);
@@ -108,17 +112,22 @@ Vue.component('game', {
   },
   methods: {
     submit: function() {
-      const clickedCards = _.filter(this.hand, 'clicked');
-      const selectedCards = _.map(clickedCards, card => card.suit+ '-' + card.rank).join(',');
-      this.gameWs.send(
-        JSON.stringify({
-          Message: selectedCards,
-          Type: 'card(s)',
-          PlayerX: this.playerX,
-          Username: this.user.username,
-          GameMaster: false
-        }
-      ));
+      const myTurn = this.myTurn();
+      if (myTurn || myTurn === undefined) {
+        const clickedCards = _.filter(this.hand, 'clicked');
+        const selectedCards = _.map(clickedCards, card => card.suit+ '-' + card.rank).join(',');
+        this.gameWs.send(
+          JSON.stringify({
+            Message: selectedCards,
+            Type: 'card(s)',
+            PlayerX: this.playerX,
+            Username: this.user.username,
+            GameMaster: false
+          }
+        ));
+      } else {
+        Materialize.toast(`Not your turn bro.`, 1000);
+      }
     },
     sort: function() {
       const suitScore = { 'spades': 4, 'hearts': 3, 'clubs': 2, 'diams': 1 };
@@ -160,6 +169,32 @@ Vue.component('game', {
           GameMaster: this.isGameMaster
         }
       ));
+    },
+    pass: function() {
+      const myTurn = this.myTurn();
+      if (myTurn) {
+        this.gameWs.send(
+          JSON.stringify({
+            Type: 'pass',
+            PlayerX: this.playerX,
+            Username: this.user.username,
+          }
+        ));
+      } else if (myTurn === false) {
+        Materialize.toast(`Not your turn bro.`, 1000);
+      }
+    },
+    myTurn: function() {
+      const whosTurn = _.find(this.playerStatuses, 'myTurn');
+      if (whosTurn) {
+        return whosTurn.username === this.user.username; // not safe...
+      }
+      return undefined
+    },
+    canSubmit: function() {
+      var sumOfCards = 0;
+      _.forEach(this.playerStatuses, (o) => sumOfCards += o.cardsLeft);
+      return sumOfCards === 52 || this.myTurn();
     }
   }
 })

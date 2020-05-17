@@ -52,5 +52,9 @@ main {
   color: yellowgreen;
   font-weight: bold;
   text-decoration: underline; 
-  /* text-decoration: underline; */
+}
+
+.my-turn {
+  font-weight: bold;
+  color: green;
 }
