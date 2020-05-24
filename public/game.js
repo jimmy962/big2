@@ -13,6 +13,7 @@ Vue.component('game', {
       handsPlayed: [],
       isGameMaster: false,
       playerX: null,
+      gameMasterCommand: '',
       playerStatuses: { playerA: { username: '', cardsLeft: -1, myTurn: false }, playerB: { myTurn: false }, playerC: { myTurn: false }, playerD: { myTurn: false } }
     }
   },
@@ -23,15 +24,17 @@ Vue.component('game', {
       <game-canvas v-bind:handsPlayed="handsPlayed"></game-canvas>
     </div>
     <div class="game-hand">
+      <div style="display: flex; flex-direction: row;">
+        <button class="button-sort" @click="sort()">Sort</button>
+        <input v-if="isGameMaster" v-on:keyup.enter="onEnter" v-model="gameMasterCommand"/>
+      </div>
       <div class="my-hand-wrapper" style="display: flex; justify-content: row; min-height: 100px;">
         <playing-card v-for="card of hand" v-bind:card="card" v-bind:hand="hand"></playing-card>    
       </div>
-      <div style="display: flex; flex-direction: row;">
-        <button v-if="isGameMaster" @click="newGame()">New Game</button>
-        <button @click="sort()">Sort</button>
-        <button v-if="canSubmit()" @click="submit()">Submit</button>
-        <button v-if="canSubmit()" @click="pass()">Pass</button>
-      </div>
+    </div>
+    <div class="game-play-button-wrapper">
+      <button class="button-pass" v-if="canSubmit()" @click="pass()">Pass</button>
+      <button class="button-submit" v-if="canSubmit()" @click="submit()">Submit</button>
     </div>
   </div
   `,
@@ -178,6 +181,12 @@ Vue.component('game', {
       var sumOfCards = 0;
       _.forEach(this.playerStatuses, (o) => sumOfCards += o.cardsLeft);
       return sumOfCards === 52 || this.myTurn();
+    },
+    onEnter: function() {
+      if (this.gameMasterCommand === 'start new game') {
+        this.newGame();
+      }
+      this.gameMasterCommand = '';
     }
   }
 })

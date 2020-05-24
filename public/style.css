@@ -26,19 +26,18 @@ main {
 }
 
 .game-canvas {
-  flex-grow: 3;
+  min-height: 430px;
   border: solid 1px black;
   width: 100%;
   display: block;
+  background-color: #F6EBC1;
 }
 
 .game-hand {
-  flex-grow: 1;
-  border: solid 1px;
+  min-height: 150px;
   width: 100%;
   display: block;
-  border-top: none;
-  padding-top: 35px;
+  height: 40px;
 }
 
 .clicked-card {
@@ -69,3 +68,47 @@ main {
   opacity: 0.2;
 }
 
+.button-submit,
+.button-pass,
+.button-warning,
+.button-sort{
+    color: white;
+    border-radius: 4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.game-play-button-wrapper {
+  display: flex; 
+  flex-direction: row; 
+  bottom: 20px; 
+  justify-content: space-between; 
+  padding-left: 130px; 
+  padding-right: 130px;
+  margin-top: 20px;
+}
+
+.button-submit {
+  background: rgb(28, 184, 65);
+  margin: 10px 5px 10px 5px;
+  font-size: 25px;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.button-pass {
+  background: rgb(202, 60, 60);
+  margin: 10px 5px 10px 5px;
+  font-size: 25px;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.button-warning {
+  background: rgb(223, 117, 20);
+}
+
+.button-sort {
+  background: rgb(66, 184, 221);
+  font-size: 20px;
+  margin: 15px;
+}
