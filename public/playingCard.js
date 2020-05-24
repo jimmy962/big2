@@ -3,10 +3,10 @@ Vue.component('playingCard', {
     return {
     }
   },
-  props: ['card'],
+  props: ['card', 'hand'],
   template: `
     <div class="playingCards playing-card-wrapper" v-on:click="card.clicked = !card.clicked">
-      <div class="card" v-bind:class="[rank, suit, { 'clicked-card': card.clicked }]">
+      <div class="card" v-bind:class="[rank, suit, { 'faded-card': shouldFade() }]">
         <span class="rank">{{card.rank}}</span>
         <div v-if="['K', 'Q', 'J'].indexOf(card.rank) > -1" class="suit">
           <span v-if="card.suit === 'spades'">&spades;</span>
@@ -43,9 +43,12 @@ Vue.component('playingCard', {
     }
   },
   methods: {
-    // clickCard: function() {
-    //   this.card.clicked = !this.card.clicked;
-    //   console.log(this.card.clicked);
-    // }
+    shouldFade: function() {
+      if (this.card.clicked) {
+        return false;
+      } else {
+        return _.find(this.hand, 'clicked') || false;
+      }
+    }
   }
 })

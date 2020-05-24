@@ -4,6 +4,10 @@ body {
   flex-direction: column;
 }
 
+.website-background-color {
+  background-color: green !important;
+}
+
 main {
   flex: 1 0 auto;
 }
@@ -30,9 +34,11 @@ main {
 
 .game-hand {
   flex-grow: 1;
-  border: solid 1px green;
+  border: solid 1px;
   width: 100%;
   display: block;
+  border-top: none;
+  padding-top: 35px;
 }
 
 .clicked-card {
@@ -58,3 +64,8 @@ main {
   font-weight: bold;
   color: green;
 }
+
+.faded-card {
+  opacity: 0.2;
+}
+

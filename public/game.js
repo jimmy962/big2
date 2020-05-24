@@ -23,19 +23,20 @@ Vue.component('game', {
       <game-canvas v-bind:handsPlayed="handsPlayed"></game-canvas>
     </div>
     <div class="game-hand">
-      <button v-if="isGameMaster" @click="newGame()">New Game</button>
-      <button @click="sort()">Sort</button>
-      <button v-if="canSubmit()" @click="submit()">Submit</button>
-      <button v-if="canSubmit()" @click="pass()">Pass</button>
-      <div class="my-hand-wrapper" style="display: flex; justify-content: row">
-        <playing-card v-for="card of hand" v-bind:card="card"></playing-card>    
+      <div class="my-hand-wrapper" style="display: flex; justify-content: row; min-height: 100px;">
+        <playing-card v-for="card of hand" v-bind:card="card" v-bind:hand="hand"></playing-card>    
+      </div>
+      <div style="display: flex; flex-direction: row;">
+        <button v-if="isGameMaster" @click="newGame()">New Game</button>
+        <button @click="sort()">Sort</button>
+        <button v-if="canSubmit()" @click="submit()">Submit</button>
+        <button v-if="canSubmit()" @click="pass()">Pass</button>
       </div>
     </div>
   </div
   `,
   props: ['user'],
   created: function() {
-    this.shuffleHand();
     setTimeout(function(){ 
       $('.my-hand-wrapper').sortable({
         revert: true,
@@ -64,7 +65,9 @@ Vue.component('game', {
             username: receivedMessage.username
           };
           self.playerStatuses[receivedMessage.playerX].cardsLeft -= handObject.cards.length
-          _.forEach(self.playerStatuses, o => o.myTurn = false)
+          _.forEach(self.playerStatuses, o => {
+            o.myTurn = false;
+          })
           self.playerStatuses[nextPlayer[receivedMessage.playerX]].myTurn = true;
           if (receivedMessage.username === self.user.username) {
             handObject.username = 'I';
@@ -139,26 +142,6 @@ Vue.component('game', {
           return rankScore[a.rank] - rankScore[b.rank];
         }
       })
-    },
-    changeCard: function() {
-      // const ranks = ['K','Q','J','10','9','8','7','6','5','4','3','2','A'];
-      // const suits = ['hearts','spades','diams','clubs'];
-      // this.testCard.rank =  ranks[Math.floor(Math.random() * ranks.length)];
-      // this.testCard.suit =  suits[Math.floor(Math.random() * suits.length)];
-    },
-    shuffleHand: function() {
-      const ranks = ['K','Q','J','10','9','8','7','6','5','4','3','2','A'];
-      const suits = ['hearts','spades','diams','clubs'];
-      const deck = [];
-      ranks.forEach(rank => {
-        suits.forEach(suit => {
-          deck.push({ rank, suit, clicked: false});
-        })
-      });
-      this.hand.splice(0, this.hand.length);
-      for (var i = 0; i < 13; i++) {
-        this.hand.push(deck[Math.floor(Math.random() * deck.length)]);
-      }
     },
     newGame: function() {
       this.gameWs.send(

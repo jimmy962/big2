@@ -1,7 +1,10 @@
 Vue.component('user-login', {
   data: function() {
     return {
-      username: 'jimboslice',
+      // username: null,
+      // email: null
+      // testing
+      username: 'jimboslice', 
       email: 'testmavrck@gmail.com'
     }
   },
