@@ -123,15 +123,17 @@ Vue.component('game', {
       if (myTurn || myTurn === undefined) {
         const clickedCards = _.filter(this.hand, 'clicked');
         const selectedCards = _.map(clickedCards, card => card.suit+ '-' + card.rank).join(',');
-        this.gameWs.send(
-          JSON.stringify({
-            Message: selectedCards,
-            Type: 'card(s)',
-            PlayerX: this.playerX,
-            Username: this.user.username,
-            GameMaster: false
-          }
-        ));
+        if (selectedCards.length) {
+          this.gameWs.send(
+            JSON.stringify({
+              Message: selectedCards,
+              Type: 'card(s)',
+              PlayerX: this.playerX,
+              Username: this.user.username,
+              GameMaster: false
+            }
+          ));
+        }
       } else {
         Materialize.toast(`Not your turn bro.`, 1000);
       }
