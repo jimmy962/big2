@@ -25,8 +25,9 @@ Vue.component('game', {
     </div>
     <div class="game-hand">
       <div style="display: flex; flex-direction: row;">
-        <button class="button-sort" @click="sort()">Sort</button>
-        <input v-if="isGameMaster" v-on:keyup.enter="onEnter" v-model="gameMasterCommand"/>
+        <button class="button-sort-rank" @click="sort('rank')">Rank</button>
+        <button class="button-sort-suit" @click="sort('suit')">Suit</button>
+        <input style="width: 400px; margin-left: 25px;" v-if="isGameMaster" v-on:keyup.enter="onEnter" v-model="gameMasterCommand"/>
       </div>
       <div class="my-hand-wrapper" style="display: flex; justify-content: row; min-height: 100px;">
         <playing-card v-for="card of hand" v-bind:card="card" v-bind:hand="hand"></playing-card>    
@@ -40,11 +41,11 @@ Vue.component('game', {
   `,
   props: ['user'],
   created: function() {
-    setTimeout(function(){ 
-      $('.my-hand-wrapper').sortable({
-        revert: true,
-      });
-    }, 2000);
+    // setTimeout(function(){ 
+    //   $('.my-hand-wrapper').sortable({
+    //     revert: 100,
+    //   });
+    // }, 2000);
     this.gameWs = new WebSocket('ws://' + window.location.host + '/ws-2');
     this.gameWs.onopen = () => {
       this.gameWs.send(
@@ -135,15 +136,25 @@ Vue.component('game', {
         Materialize.toast(`Not your turn bro.`, 1000);
       }
     },
-    sort: function() {
-      const suitScore = { 'spades': 4, 'hearts': 3, 'clubs': 2, 'diams': 1 };
-      const rankScore = { '3':3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14, '2': 15};
+    sort: function(primarySortField) {
+      const secondarySortField = primarySortField === 'suit' ? 'rank' : 'suit';
+      const scoring = {
+        suit: { 'spades': 4, 'hearts': 3, 'clubs': 2, 'diams': 1 },
+        rank: { '3':3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14, '2': 15}
+      }
+      // const suitScore = { 'spades': 4, 'hearts': 3, 'clubs': 2, 'diams': 1 };
+      // const rankScore = { '3':3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14, '2': 15};
       this.hand.sort((a, b) => {
-        if (a.rank === b.rank) {
-          return suitScore[a.suit] - suitScore[b.suit];
+        if (a[primarySortField] === b[primarySortField]) {
+          return scoring[secondarySortField][a[secondarySortField]] - scoring[secondarySortField][b[secondarySortField]];
         } else {
-          return rankScore[a.rank] - rankScore[b.rank];
+          return scoring[primarySortField][a[primarySortField]] - scoring[primarySortField][b[primarySortField]];
         }
+        // if (a.rank === b.rank) {
+        //   return suitScore[a.suit] - suitScore[b.suit];
+        // } else {
+        //   return rankScore[a.rank] - rankScore[b.rank];
+        // }
       })
     },
     newGame: function() {
