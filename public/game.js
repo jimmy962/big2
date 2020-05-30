@@ -20,14 +20,17 @@ Vue.component('game', {
   template: `
   <div class="game-wrapper">
     <div class="game-canvas">
-      <player-statuses v-bind:players="playerStatuses" v-bind:user="user"></player-statuses>
+      <div class="md-layout">
+        <player-statuses class="md-layout-item" v-bind:players="playerStatuses" v-bind:user="user"></player-statuses>
+        <div class="md-layout-item"></div>
+      </div>
       <game-canvas v-bind:handsPlayed="handsPlayed"></game-canvas>
     </div>
     <div class="game-hand">
-      <div style="display: flex; flex-direction: row;">
+      <div style="display: flex; flex-direction: row; min-height: 66px;">
         <button class="button-sort-rank" @click="sort('rank')">Rank</button>
         <button class="button-sort-suit" @click="sort('suit')">Suit</button>
-        <input style="width: 400px; margin-left: 25px;" v-if="isGameMaster" v-on:keyup.enter="onEnter" v-model="gameMasterCommand"/>
+        <input style="width: 400px; margin-left: 25px; color: white;" v-if="isGameMaster" v-on:keyup.enter="onEnter" v-model="gameMasterCommand"/>
       </div>
       <div class="my-hand-wrapper" style="display: flex; justify-content: row; min-height: 100px;">
         <playing-card v-for="card of hand" v-bind:card="card" v-bind:hand="hand"></playing-card>    
@@ -74,7 +77,7 @@ Vue.component('game', {
           })
           self.playerStatuses[nextPlayer[receivedMessage.playerX]].myTurn = true;
           if (receivedMessage.username === self.user.username) {
-            handObject.username = 'I';
+            handObject.username = 'You';
             cards.forEach((card) => {
               const i = self.hand.findIndex(o => o.rank === card.rank && o.suit === card.suit);
               self.hand.splice(i, 1);
@@ -144,19 +147,12 @@ Vue.component('game', {
         suit: { 'spades': 4, 'hearts': 3, 'clubs': 2, 'diams': 1 },
         rank: { '3':3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14, '2': 15}
       }
-      // const suitScore = { 'spades': 4, 'hearts': 3, 'clubs': 2, 'diams': 1 };
-      // const rankScore = { '3':3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14, '2': 15};
       this.hand.sort((a, b) => {
         if (a[primarySortField] === b[primarySortField]) {
           return scoring[secondarySortField][a[secondarySortField]] - scoring[secondarySortField][b[secondarySortField]];
         } else {
           return scoring[primarySortField][a[primarySortField]] - scoring[primarySortField][b[primarySortField]];
         }
-        // if (a.rank === b.rank) {
-        //   return suitScore[a.suit] - suitScore[b.suit];
-        // } else {
-        //   return rankScore[a.rank] - rankScore[b.rank];
-        // }
       })
     },
     newGame: function() {

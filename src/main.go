@@ -127,7 +127,7 @@ func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *pl
 		err := ws.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			log.Printf("somebody left the game probably....")
+			log.Printf((*newPlayer).username + " left the game probably....")
 			delete(gameClients, ws)
 			if (*newPlayer).name == "playerA" {
 				(*allPlayers).playerA = false

@@ -18,7 +18,6 @@ Vue.component('user-login', {
     </div>
     <div class="input-field col s4">
       <button class="waves-effect waves-light btn" @click="join()">
-        <i class="material-icons right">done</i>
         Join
       </button>
     </div>

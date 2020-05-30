@@ -8,7 +8,7 @@ Vue.component('game-canvas', {
   props: ['handsPlayed'],
   template: `
   <div v-if="lastHandPlayed">
-    <h4>{{lastHandPlayed.username}} played:</h4>
+    <h4 style="color:burlywood; font-size: 30px;"><b><u>{{lastHandPlayed.username}}</u></b> played:</h4>
     <div class="my-hand-wrapper" style="display: flex; justify-content: row">
       <playing-card v-for="card of lastHandPlayed.cards" v-bind:card="card"><playing-card>    
     </div>
