@@ -16,9 +16,13 @@ Vue.component('game-canvas', {
   `,
   watch: {
     handsPlayed: function(pipe) {
-      this.lastHandPlayed = {
-        cards: pipe[pipe.length - 1].cards,
-        username: pipe[pipe.length - 1].username
+      if (pipe[pipe.length - 1]) {
+        this.lastHandPlayed = {
+          cards: pipe[pipe.length - 1].cards,
+          username: pipe[pipe.length - 1].username
+        }
+      } else {
+        this.lastHandPlayed = null;
       }
     }
   },

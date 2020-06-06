@@ -109,6 +109,7 @@ Vue.component('game', {
               o.myTurn = false;
             });
           }
+          self.handsPlayed.splice(0,self.handsPlayed.length)
         } else if (receivedMessage.type === 'pass') {
           _.forEach(self.playerStatuses, o => o.myTurn = undefined)
           self.playerStatuses[nextPlayer[receivedMessage.playerX]].myTurn = true;
