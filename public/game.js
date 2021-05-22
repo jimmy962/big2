@@ -44,11 +44,6 @@ Vue.component('game', {
   `,
   props: ['user'],
   created: function() {
-    // setTimeout(function(){ 
-    //   $('.my-hand-wrapper').sortable({
-    //     revert: 100,
-    //   });
-    // }, 2000);
     this.gameWs = new WebSocket('ws://' + window.location.host + '/wsxyz');
     this.gameWs.onopen = () => {
       this.gameWs.send(

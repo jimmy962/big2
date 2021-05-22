@@ -62,10 +62,6 @@ func dealHands() ([]string, []string, []string, []string) {
 	}
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(52, func(i, j int) { deck[i], deck[j] = deck[j], deck[i] })
-	// for i := 0; i < 52; i++ {
-	// 	j := rand.Seed(time.Now().UnixNano())
-	// 	deck[i], deck[j] = deck[j], deck[i]
-	// }
 	return deck[0:13], deck[13:26], deck[26:39], deck[39:52]
 }
 
