@@ -80,7 +80,7 @@ func main() {
 		playerC: false,
 		playerD: false,
 	}
-	http.HandleFunc("/ws-2", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/wsxyz", func(w http.ResponseWriter, r *http.Request) {
 		if players.playerA && players.playerB && players.playerC && players.playerD {
 			log.Printf("Game is full!")
 		} else {

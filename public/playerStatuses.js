@@ -11,7 +11,7 @@ Vue.component('player-statuses', {
       <span v-if="key === 'playerC'"><b>Player 3</b> -&nbsp;</span>
       <span v-if="key === 'playerD'"><b>Player 4</b> -&nbsp;</span>
       <div v-if="player.username">
-        <span v-bind:class="[{ 'emphasize-username': user.username === player.username }]">{{player.username}}</span>
+        <span v-bind:class="[{ 'emphasize-username': user.username === player.username }]">{{ player.username | username }}</span>
       </div>
       <div v-if="!player.username" style="color: green">Seat available</div>
       <div v-if="player.cardsLeft > -1">&nbsp;-&nbsp;<b style="color: blue">{{player.cardsLeft}}</b></div>
@@ -24,5 +24,14 @@ Vue.component('player-statuses', {
   computed: {
   },
   methods: {
+  },
+  filters: {
+    username: (username) => {
+      if (username.includes('bless')) {
+        return 'wilson';
+      } else {
+        return username;
+      }
+    }
   }
 })

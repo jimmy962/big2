@@ -49,7 +49,7 @@ Vue.component('game', {
     //     revert: 100,
     //   });
     // }, 2000);
-    this.gameWs = new WebSocket('ws://' + window.location.host + '/ws-2');
+    this.gameWs = new WebSocket('ws://' + window.location.host + '/wsxyz');
     this.gameWs.onopen = () => {
       this.gameWs.send(
         JSON.stringify({
@@ -193,7 +193,7 @@ Vue.component('game', {
       return sumOfCards === 52 || this.myTurn();
     },
     onEnter: function() {
-      if (this.gameMasterCommand === 'start new game') {
+      if (this.gameMasterCommand === 'start') {
         this.newGame();
       }
       this.gameMasterCommand = '';
