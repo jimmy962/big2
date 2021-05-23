@@ -44,7 +44,7 @@ Vue.component('game', {
   `,
   props: ['user'],
   created: function() {
-    this.gameWs = new WebSocket('ws://' + window.location.host + '/wsxyz');
+    this.gameWs = new WebSocket('ws://' + window.location.host + '/play');
     this.gameWs.onopen = () => {
       this.gameWs.send(
         JSON.stringify({

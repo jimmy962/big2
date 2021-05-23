@@ -63,7 +63,7 @@ func main() {
 
 	var gameTable [4]*Player
 
-	http.HandleFunc("/wsxyz", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/play", func(w http.ResponseWriter, r *http.Request) {
 		if gameTable[0] == nil {
 			gameTable[0] = &Player{name: "playerA"}
 			handleConnectionsGame(w, r, 0, &gameTable)
