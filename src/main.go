@@ -31,7 +31,6 @@ type gameMessage struct {
 	GameMaster bool   `json:"gameMaster"`
 }
 
-// this could be an array
 type gamePlayers struct {
 	playerA bool
 	playerB bool
@@ -76,26 +75,29 @@ func main() {
 		playerC: false,
 		playerD: false,
 	}
+
+	var gameTable [4]*player
+
 	http.HandleFunc("/wsxyz", func(w http.ResponseWriter, r *http.Request) {
 		if players.playerA && players.playerB && players.playerC && players.playerD {
 			log.Printf("Game is full!")
 		} else {
 			if !players.playerA {
 				players.playerA = true
-				newPlayer := player{name: "playerA"}
-				handleConnectionsGame(w, r, &newPlayer, &players)
+				gameTable[0] = &player{name: "playerA"}
+				handleConnectionsGame(w, r, gameTable[0], &players)
 			} else if !players.playerB {
 				players.playerB = true
-				newPlayer := player{name: "playerB"}
-				handleConnectionsGame(w, r, &newPlayer, &players)
+				gameTable[1] = &player{name: "playerB"}
+				handleConnectionsGame(w, r, gameTable[1], &players)
 			} else if !players.playerC {
 				players.playerC = true
-				newPlayer := player{name: "playerC"}
-				handleConnectionsGame(w, r, &newPlayer, &players)
+				gameTable[2] = &player{name: "playerC"}
+				handleConnectionsGame(w, r, gameTable[2], &players)
 			} else {
 				players.playerD = true
-				newPlayer := player{name: "playerD"}
-				handleConnectionsGame(w, r, &newPlayer, &players)
+				gameTable[3] = &player{name: "playerD"}
+				handleConnectionsGame(w, r, gameTable[3], &players)
 			}
 		}
 	})
@@ -114,19 +116,20 @@ func main() {
 }
 
 func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *player, allPlayers *gamePlayers) {
+	// TODO in the morning...stop using allPlayers...use the new map
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
+	// newPlayer :=
 	defer ws.Close()
 	gameClients[ws] = true
 	for {
 		var msg gameMessage
-		// Read in a new message as JSON and map it to a Message object
 		err := ws.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			log.Printf((*newPlayer).username + " left the game probably....")
+			log.Printf((*newPlayer).username + " disconnected...")
 			delete(gameClients, ws)
 			if (*newPlayer).name == "playerA" {
 				(*allPlayers).playerA = false
@@ -137,9 +140,8 @@ func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *pl
 			} else {
 				(*allPlayers).playerD = false
 			}
-			/* Part C
-			1) broadcast to everyone that player X left.
-			2) front-end should send a notification, then users go back to waiting area...
+			/*
+				TODO: Notify client that a player has left
 			*/
 			break
 		} else {
