@@ -1,7 +1,7 @@
 # Big 2
 This is an implementation of the Chinese poker game Big 2 for desktop browsers.
 
-![alt text](https://github.com/jimmy962/big2/game.png?raw=true)
+![alt text](https://github.com/jimmy962/big2/blob/master/game.png?raw=true)
 
 ## Development
 ```
