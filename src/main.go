@@ -30,14 +30,6 @@ type gameMessage struct {
 	Username   string `json:"username"`
 	GameMaster bool   `json:"gameMaster"`
 }
-
-type gamePlayers struct {
-	playerA bool
-	playerB bool
-	playerC bool
-	playerD bool
-}
-
 type gamePlayersName struct {
 	playerA string
 	playerB string
@@ -45,8 +37,8 @@ type gamePlayersName struct {
 	playerD string
 }
 
-type player struct {
-	name     string
+type Player struct {
+	name     string // used to identify player #
 	username string
 }
 
@@ -69,43 +61,30 @@ func main() {
 	fs := http.FileServer(http.Dir("../public"))
 	http.Handle("/", fs)
 
-	players := gamePlayers{
-		playerA: false,
-		playerB: false,
-		playerC: false,
-		playerD: false,
-	}
-
-	var gameTable [4]*player
+	var gameTable [4]*Player
 
 	http.HandleFunc("/wsxyz", func(w http.ResponseWriter, r *http.Request) {
-		if players.playerA && players.playerB && players.playerC && players.playerD {
-			log.Printf("Game is full!")
+		if gameTable[0] == nil {
+			gameTable[0] = &Player{name: "playerA"}
+			handleConnectionsGame(w, r, 0, &gameTable)
+		} else if gameTable[1] == nil {
+			gameTable[1] = &Player{name: "playerB"}
+			handleConnectionsGame(w, r, 1, &gameTable)
+		} else if gameTable[2] == nil {
+			gameTable[2] = &Player{name: "playerC"}
+			handleConnectionsGame(w, r, 2, &gameTable)
+		} else if gameTable[3] == nil {
+			gameTable[3] = &Player{name: "playerD"}
+			handleConnectionsGame(w, r, 3, &gameTable)
 		} else {
-			if !players.playerA {
-				players.playerA = true
-				gameTable[0] = &player{name: "playerA"}
-				handleConnectionsGame(w, r, gameTable[0], &players)
-			} else if !players.playerB {
-				players.playerB = true
-				gameTable[1] = &player{name: "playerB"}
-				handleConnectionsGame(w, r, gameTable[1], &players)
-			} else if !players.playerC {
-				players.playerC = true
-				gameTable[2] = &player{name: "playerC"}
-				handleConnectionsGame(w, r, gameTable[2], &players)
-			} else {
-				players.playerD = true
-				gameTable[3] = &player{name: "playerD"}
-				handleConnectionsGame(w, r, gameTable[3], &players)
-			}
+			log.Printf("Game is full!")
 		}
 	})
 
-	go handleGameMessages(&players)
+	go handleGameMessages(&gameTable)
 
+	// For the chat
 	http.HandleFunc("/ws", handleConnections)
-
 	go handleMessages()
 
 	log.Println("http server started on :8000")
@@ -115,13 +94,12 @@ func main() {
 	}
 }
 
-func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *player, allPlayers *gamePlayers) {
-	// TODO in the morning...stop using allPlayers...use the new map
+func handleConnectionsGame(w http.ResponseWriter, r *http.Request, index int, gameTable *[4]*Player) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// newPlayer :=
+	player := *gameTable[index]
 	defer ws.Close()
 	gameClients[ws] = true
 	for {
@@ -129,28 +107,18 @@ func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *pl
 		err := ws.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			log.Printf((*newPlayer).username + " disconnected...")
+			log.Printf(player.username + " disconnected...")
+			(*gameTable)[index] = nil
 			delete(gameClients, ws)
-			if (*newPlayer).name == "playerA" {
-				(*allPlayers).playerA = false
-			} else if (*newPlayer).name == "playerB" {
-				(*allPlayers).playerB = false
-			} else if (*newPlayer).name == "playerC" {
-				(*allPlayers).playerC = false
-			} else {
-				(*allPlayers).playerD = false
-			}
-			/*
-				TODO: Notify client that a player has left
-			*/
+			//	TODO: Notify client that the player left
 			break
 		} else {
 			if msg.Type == "new_player" {
-				(*newPlayer).username = msg.Username
-				msg.PlayerX = (*newPlayer).name
-				msg.GameMaster = msg.PlayerX == "playerA"
+				player.username = msg.Username
+				msg.PlayerX = player.name
+				msg.GameMaster = index == 0
 			} else if msg.Type == "new_game" {
-				if (*allPlayers).playerA && (*allPlayers).playerB && (*allPlayers).playerC && (*allPlayers).playerD {
+				if (*gameTable)[0] != nil && (*gameTable)[1] != nil && (*gameTable)[2] != nil && (*gameTable)[3] != nil {
 					playerAHand, playerBHand, playerCHand, playerDHand := dealHands()
 					gameBroadcast <- gameMessage{PlayerX: "playerA", Message: strings.Join(playerAHand, ","), Type: "new_game"}
 					gameBroadcast <- gameMessage{PlayerX: "playerB", Message: strings.Join(playerBHand, ","), Type: "new_game"}
@@ -164,24 +132,24 @@ func handleConnectionsGame(w http.ResponseWriter, r *http.Request, newPlayer *pl
 	}
 }
 
-func combineUsernames(playerNames *gamePlayersName, statuses *gamePlayers) string {
+func combineUsernames(playerNames *gamePlayersName, gameTable *[4]*Player) string {
 	var usernames = ""
-	if (*playerNames).playerA != "" && (*statuses).playerA {
+	if (*playerNames).playerA != "" && (*gameTable)[0] != nil {
 		usernames = usernames + "A:" + (*playerNames).playerA
 	}
-	if (*playerNames).playerB != "" && (*statuses).playerB {
+	if (*playerNames).playerB != "" && (*gameTable)[1] != nil {
 		usernames = usernames + "," + "B:" + (*playerNames).playerB
 	}
-	if (*playerNames).playerC != "" && (*statuses).playerC {
+	if (*playerNames).playerC != "" && (*gameTable)[2] != nil {
 		usernames = usernames + "," + "C:" + (*playerNames).playerC
 	}
-	if (*playerNames).playerD != "" && (*statuses).playerD {
+	if (*playerNames).playerD != "" && (*gameTable)[3] != nil {
 		usernames = usernames + "," + "D:" + (*playerNames).playerD
 	}
 	return usernames
 }
 
-func handleGameMessages(statuses *gamePlayers) {
+func handleGameMessages(gameTable *[4]*Player) {
 	playerNames := gamePlayersName{}
 	for {
 		// Grab the next message from the broadcast channel
@@ -197,7 +165,7 @@ func handleGameMessages(statuses *gamePlayers) {
 			case "playerD":
 				playerNames.playerD = msg.Username
 			}
-			msg.Message = combineUsernames(&playerNames, statuses)
+			msg.Message = combineUsernames(&playerNames, gameTable)
 		}
 		for gameClient := range gameClients {
 			err := gameClient.WriteJSON(msg)
@@ -209,17 +177,6 @@ func handleGameMessages(statuses *gamePlayers) {
 		}
 	}
 }
-
-// **********************************************************************************************************************************
-// **********************************************************************************************************************************
-// **********************************************************************************************************************************
-// **********************************************************************************************************************************
-// **********************************************************************************************************************************
-// [OG CODE]
-// **********************************************************************************************************************************
-// **********************************************************************************************************************************
-// **********************************************************************************************************************************
-// **********************************************************************************************************************************
 
 func handleConnections(w http.ResponseWriter, r *http.Request) {
 	// Upgrade initial GET request to a websocket
@@ -261,5 +218,3 @@ func handleMessages() {
 		}
 	}
 }
-
-// go run main.go
