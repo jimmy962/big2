@@ -27,11 +27,7 @@ Vue.component('player-statuses', {
   },
   filters: {
     username: (username) => {
-      if (username.includes('bless')) {
-        return 'wilson';
-      } else {
-        return username;
-      }
+      return username;
     }
   }
 })
