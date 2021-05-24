@@ -12,7 +12,7 @@ go run main.go
 
 ## Production
 ```
-docker run -it --publish 8000:8000 jelly55/big2_main:version3
+docker run -it --publish 80:8000 jelly55/big2:v1
 ```
 
 ## Notes
