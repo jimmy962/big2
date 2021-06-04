@@ -25,17 +25,17 @@ Vue.component('group-chat', {
   `,
   created: function() {
     var self = this;
-    // this.chatWs = new WebSocket('ws://' + window.location.host + '/ws');
-    // this.chatWs.addEventListener('message', function(e) {
-    //     var msg = JSON.parse(e.data);
-    //     self.chatContent += '<div class="chip">'
-    //             + '<img src="' + self.gravatarURL(msg.email) + '">' // Avatar
-    //             + msg.username
-    //         + '</div>'
-    //         + emojione.toImage(msg.message) + '<br/>'; // Parse emojis
-    //     var element = document.getElementById('chat-messages');
-    //     element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
-    // });
+    this.chatWs = new WebSocket('ws://' + window.location.host + '/ws');
+    this.chatWs.addEventListener('message', function(e) {
+        var msg = JSON.parse(e.data);
+        self.chatContent += '<div class="chip">'
+                + '<img src="' + self.gravatarURL(msg.email) + '">' // Avatar
+                + msg.username
+            + '</div>'
+            + emojione.toImage(msg.message) + '<br/>'; // Parse emojis
+        var element = document.getElementById('chat-messages');
+        element.scrollTop = element.scrollHeight; // Auto scroll to the bottom
+    });
   },
   methods: {
     gravatarURL: function(email) {
